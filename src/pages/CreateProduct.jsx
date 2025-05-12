@@ -51,7 +51,7 @@ const CreateProduct = () => {
   };
 
   return (
-    <Box maxW="md" mx="auto" mt={10}>
+    <Box maxW="md" mx="auto" mt={10} padding={4}>
       <Button onClick={() => navigate("/")} colorScheme="gray" mb={4}>
         Back to Products
       </Button>

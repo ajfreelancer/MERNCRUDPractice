@@ -49,7 +49,7 @@ const EditProduct = () => {
   if (loading) return <Spinner />;
 
   return (
-    <Box maxW="md" mx="auto" mt={8}>
+    <Box maxW="md" mx="auto" mt={8} padding={4}>
       <Button onClick={() => navigate("/")} colorScheme="gray" mb={4}>
         Back to Products
       </Button>
