@@ -6,30 +6,48 @@ import {
   Input,
   Heading,
   useToast,
+  FormErrorMessage,
 } from "@chakra-ui/react";
-import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { yupResolver } from "@hookform/resolvers/yup";
+import * as Yup from "yup";
 import { useNavigate } from "react-router-dom";
 
+// Validation schema
+const schema = Yup.object().shape({
+  name: Yup.string().required("Name is required"),
+  price: Yup.number()
+    .typeError("Price must be a number")
+    .positive("Price must be greater than 0")
+    .required("Price is required"),
+  image: Yup.string()
+    .url("Image must be a valid URL")
+    .required("Image URL is required"),
+});
+
 const CreateProduct = () => {
-  const [name, setName] = useState("");
-  const [price, setPrice] = useState("");
-  const [image, setImage] = useState("");
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm({
+    resolver: yupResolver(schema),
+  });
+
   const toast = useToast();
   const navigate = useNavigate();
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
+  const onSubmit = async (data) => {
     const res = await fetch(
       `${import.meta.env.VITE_API_BASE_URL}/api/products`,
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, price, image }),
+        body: JSON.stringify(data),
       }
     );
 
-    const data = await res.json();
+    const result = await res.json();
 
     if (res.ok) {
       toast({
@@ -42,7 +60,7 @@ const CreateProduct = () => {
     } else {
       toast({
         title: "Error",
-        description: data.message || "Something went wrong",
+        description: result.message || "Something went wrong",
         status: "error",
         duration: 3000,
         isClosable: true,
@@ -56,24 +74,23 @@ const CreateProduct = () => {
         Back to Products
       </Button>
       <Heading mb={6}>Add New Product</Heading>
-      <form onSubmit={handleSubmit}>
-        <FormControl mb={4} isRequired>
+      <form onSubmit={handleSubmit(onSubmit)}>
+        <FormControl mb={4} isInvalid={!!errors.name}>
           <FormLabel>Name</FormLabel>
-          <Input value={name} onChange={(e) => setName(e.target.value)} />
+          <Input {...register("name")} />
+          <FormErrorMessage>{errors.name?.message}</FormErrorMessage>
         </FormControl>
 
-        <FormControl mb={4} isRequired>
+        <FormControl mb={4} isInvalid={!!errors.price}>
           <FormLabel>Price</FormLabel>
-          <Input
-            type="number"
-            value={price}
-            onChange={(e) => setPrice(e.target.value)}
-          />
+          <Input type="number" {...register("price")} />
+          <FormErrorMessage>{errors.price?.message}</FormErrorMessage>
         </FormControl>
 
-        <FormControl mb={4} isRequired>
+        <FormControl mb={4} isInvalid={!!errors.image}>
           <FormLabel>Image URL</FormLabel>
-          <Input value={image} onChange={(e) => setImage(e.target.value)} />
+          <Input {...register("image")} />
+          <FormErrorMessage>{errors.image?.message}</FormErrorMessage>
         </FormControl>
 
         <Button type="submit" colorScheme="teal" width="full">

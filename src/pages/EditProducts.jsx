@@ -6,47 +6,82 @@ import {
   Input,
   useToast,
   Spinner,
+  FormErrorMessage,
 } from "@chakra-ui/react";
 import { useParams, useNavigate } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
+import { useForm } from "react-hook-form";
+import { yupResolver } from "@hookform/resolvers/yup";
+import * as Yup from "yup";
+
+// Validation schema
+const schema = Yup.object().shape({
+  name: Yup.string().required("Name is required"),
+  price: Yup.number()
+    .typeError("Price must be a number")
+    .positive("Price must be greater than 0")
+    .required("Price is required"),
+  image: Yup.string()
+    .url("Must be a valid URL")
+    .required("Image URL is required"),
+});
 
 const EditProduct = () => {
   const { id } = useParams();
-  const [product, setProduct] = useState({ name: "", price: "", image: "" });
-  const [loading, setLoading] = useState(true);
   const toast = useToast();
   const navigate = useNavigate();
 
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    formState: { errors, isSubmitting },
+  } = useForm({
+    resolver: yupResolver(schema),
+    defaultValues: {
+      name: "",
+      price: "",
+      image: "",
+    },
+  });
+
   useEffect(() => {
-    fetch(`${import.meta.env.VITE_API_BASE_URL}/api/products/${id}`)
-      .then((res) => res.json())
-      .then((data) => {
-        console.log(data);
+    const fetchProduct = async () => {
+      const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/products/${id}`);
+      const data = await res.json();
+      setValue("name", data.name);
+      setValue("price", data.price);
+      setValue("image", data.image);
+    };
+    fetchProduct();
+  }, [id, setValue]);
 
-        setProduct(data);
-        setLoading(false);
-      });
-  }, [id]);
-
-  const handleChange = (e) => {
-    setProduct({ ...product, [e.target.name]: e.target.value });
-  };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    fetch(`${import.meta.env.VITE_API_BASE_URL}/api/products/${id}`, {
+  const onSubmit = async (formData) => {
+    const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/products/${id}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(product),
-    })
-      .then((res) => res.json())
-      .then(() => {
-        toast({ title: "Product updated!", status: "success", duration: 2000 });
-        navigate("/");
-      });
-  };
+      body: JSON.stringify(formData),
+    });
 
-  if (loading) return <Spinner />;
+    if (res.ok) {
+      toast({
+        title: "Product updated!",
+        status: "success",
+        duration: 2000,
+        isClosable: true,
+      });
+      navigate("/");
+    } else {
+      const data = await res.json();
+      toast({
+        title: "Error",
+        description: data.message || "Something went wrong",
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+      });
+    }
+  };
 
   return (
     <Box maxW="md" mx="auto" mt={8} padding={4}>
@@ -54,39 +89,26 @@ const EditProduct = () => {
         Back to Products
       </Button>
 
-      <form onSubmit={handleSubmit}>
-        <FormControl mb={4}>
+      <form onSubmit={handleSubmit(onSubmit)}>
+        <FormControl mb={4} isInvalid={!!errors.name}>
           <FormLabel>Name</FormLabel>
-          <Input
-            name="name"
-            value={product.name}
-            onChange={handleChange}
-            required
-          />
+          <Input {...register("name")} />
+          <FormErrorMessage>{errors.name?.message}</FormErrorMessage>
         </FormControl>
 
-        <FormControl mb={4}>
+        <FormControl mb={4} isInvalid={!!errors.price}>
           <FormLabel>Price</FormLabel>
-          <Input
-            name="price"
-            type="number"
-            value={product.price}
-            onChange={handleChange}
-            required
-          />
+          <Input type="number" {...register("price")} />
+          <FormErrorMessage>{errors.price?.message}</FormErrorMessage>
         </FormControl>
 
-        <FormControl mb={4}>
+        <FormControl mb={4} isInvalid={!!errors.image}>
           <FormLabel>Image URL</FormLabel>
-          <Input
-            name="image"
-            value={product.image}
-            onChange={handleChange}
-            required
-          />
+          <Input {...register("image")} />
+          <FormErrorMessage>{errors.image?.message}</FormErrorMessage>
         </FormControl>
 
-        <Button type="submit" colorScheme="teal">
+        <Button type="submit" colorScheme="teal" isLoading={isSubmitting}>
           Update Product
         </Button>
       </form>
