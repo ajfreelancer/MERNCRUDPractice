@@ -79,7 +79,7 @@ const Home = () => {
 
   if (loading) {
     return (
-      <Center py={10}>
+      <Center py={10} minH={"80vh"}>
         <Spinner size="xl" />
       </Center>
     );
@@ -87,7 +87,7 @@ const Home = () => {
 
   return (
     <Center>
-      <Box p={4} maxWidth={"1300px"}>
+      <Box p={4} maxWidth={"1300px"} minH={"100vh"}>
         <Center>
           <Heading
             mb={6}
