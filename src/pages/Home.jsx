@@ -22,7 +22,7 @@ import {
   useColorModeValue,
 } from "@chakra-ui/react";
 import { Button } from "@chakra-ui/react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { FiSettings } from "react-icons/fi";
 import { MdDelete } from "react-icons/md";
 import { IconButton, HStack } from "@chakra-ui/react";
@@ -32,13 +32,12 @@ const Home = () => {
   const [loading, setLoading] = useState(true);
 
   const { isOpen, onOpen, onClose } = useDisclosure();
+  const navigate = useNavigate();
   const cancelRef = useRef();
   const [selectedProductId, setSelectedProductId] = useState(null);
-  const priceColor = useColorModeValue('teal.500', 'teal.100');
-  const cardColor = useColorModeValue('gray.100', 'gray.800');
-
-
-
+  const priceColor = useColorModeValue("teal.500", "teal.100");
+  const cardColor = useColorModeValue("gray.100", "gray.800");
+  const toast = useToast();
 
   useEffect(() => {
     fetch(`${import.meta.env.VITE_API_BASE_URL}/api/products`)
@@ -53,7 +52,6 @@ const Home = () => {
         setLoading(false);
       });
   }, []);
-
 
   const handleDelete = async (id) => {
     try {
@@ -123,20 +121,46 @@ const Home = () => {
                     PKR {product.price.toLocaleString()}
                   </Text>
                   <HStack spacing={2} mt={3}>
-                    <Link to={`/edit/${product._id}`}>
-                      <IconButton
-                        icon={<FiSettings />}
-                        aria-label="Edit product"
-                        size="sm"
-                        colorScheme="teal"
-                      />
-                    </Link>
+                    <IconButton
+                      icon={<FiSettings />}
+                      aria-label="Edit product"
+                      size="sm"
+                      colorScheme="teal"
+                      onClick={() => {
+                        const token = localStorage.getItem("token");
+                        if (token) {
+                          navigate(`/edit/${product._id}`);
+                        } else {
+                          toast({
+                            title: "Unauthorized",
+                            description:
+                              "You must be logged in to edit a product.",
+                            status: "warning",
+                            duration: 3000,
+                            isClosable: true,
+                          });
+                        }
+                      }}
+                    />
+
                     <Button
                       size="sm"
                       colorScheme="red"
                       onClick={() => {
-                        setSelectedProductId(product._id);
-                        onOpen();
+                        const token = localStorage.getItem("token");
+                        if (token) {
+                          setSelectedProductId(product._id);
+                          onOpen();
+                        } else {
+                          toast({
+                            title: "Unauthorized",
+                            description:
+                              "You must be logged in to delete a product.",
+                            status: "warning",
+                            duration: 3000,
+                            isClosable: true,
+                          });
+                        }
                       }}
                     >
                       <MdDelete />

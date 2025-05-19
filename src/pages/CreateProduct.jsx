@@ -69,34 +69,42 @@ const CreateProduct = () => {
   };
 
   return (
-    <Box maxW="md" mx="auto" mt={10} padding={4}>
-      <Button onClick={() => navigate("/")} colorScheme="gray" mb={4}>
-        Back to Products
-      </Button>
-      <Heading mb={6}>Add New Product</Heading>
-      <form onSubmit={handleSubmit(onSubmit)}>
-        <FormControl mb={4} isInvalid={!!errors.name}>
-          <FormLabel>Name</FormLabel>
-          <Input {...register("name")} />
-          <FormErrorMessage>{errors.name?.message}</FormErrorMessage>
-        </FormControl>
-
-        <FormControl mb={4} isInvalid={!!errors.price}>
-          <FormLabel>Price</FormLabel>
-          <Input type="number" {...register("price")} />
-          <FormErrorMessage>{errors.price?.message}</FormErrorMessage>
-        </FormControl>
-
-        <FormControl mb={4} isInvalid={!!errors.image}>
-          <FormLabel>Image URL</FormLabel>
-          <Input {...register("image")} />
-          <FormErrorMessage>{errors.image?.message}</FormErrorMessage>
-        </FormControl>
-
-        <Button type="submit" colorScheme="teal" width="full">
-          Create Product
+    <Box
+      minH="79vh"
+      display="flex"
+      justifyContent="center"
+      alignItems="center"
+      p={4}
+    >
+      <Box maxW="md" width="100%">
+        <Button onClick={() => navigate("/")} colorScheme="gray" mb={4}>
+          Back to Products
         </Button>
-      </form>
+        <Heading mb={6}>Add New Product</Heading>
+        <form onSubmit={handleSubmit(onSubmit)}>
+          <FormControl mb={4} isInvalid={!!errors.name}>
+            <FormLabel>Name</FormLabel>
+            <Input {...register("name")} />
+            <FormErrorMessage>{errors.name?.message}</FormErrorMessage>
+          </FormControl>
+
+          <FormControl mb={4} isInvalid={!!errors.price}>
+            <FormLabel>Price</FormLabel>
+            <Input type="number" {...register("price")} />
+            <FormErrorMessage>{errors.price?.message}</FormErrorMessage>
+          </FormControl>
+
+          <FormControl mb={4} isInvalid={!!errors.image}>
+            <FormLabel>Image URL</FormLabel>
+            <Input {...register("image")} />
+            <FormErrorMessage>{errors.image?.message}</FormErrorMessage>
+          </FormControl>
+
+          <Button type="submit" colorScheme="teal" width="full">
+            Create Product
+          </Button>
+        </form>
+      </Box>
     </Box>
   );
 };

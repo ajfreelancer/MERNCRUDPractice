@@ -9,13 +9,14 @@ import {
   VStack,
   Flex,
   useToast,
+  Center,
+  Heading
 } from "@chakra-ui/react";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import { useNavigate } from "react-router-dom";
-import axios from 'axios';
-
+import axios from "axios";
 
 const schema = yup.object({
   username: yup.string().required(),
@@ -34,7 +35,10 @@ export default function Signup() {
 
   const onSubmit = async (data) => {
     try {
-      const res = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/api/users/login`, data);
+      const res = await axios.post(
+        `${import.meta.env.VITE_API_BASE_URL}/api/users/login`,
+        data
+      );
       localStorage.setItem("token", res.data.token);
       Toast({
         title: "Signup Successful",
@@ -54,11 +58,23 @@ export default function Signup() {
       });
     }
   };
-  
 
   return (
     <Flex minH="80vh" align="center" justify="center">
-      <Box maxW="md" w="100%" p={6} boxShadow="md" border={"1px solid #333"} borderRadius="md">
+      <Box
+        maxW="md"
+        w="100%"
+        p={6}
+        m={4}
+        boxShadow="md"
+        border={"1px solid #333"}
+        borderRadius="md"
+      >
+        <Center>
+          <Heading mb={6} marginBottom={"4"} width={"fit-content"}>
+            Sign Up
+          </Heading>
+        </Center>
         <form onSubmit={handleSubmit(onSubmit)}>
           <VStack spacing={4}>
             <FormControl isInvalid={errors.username}>

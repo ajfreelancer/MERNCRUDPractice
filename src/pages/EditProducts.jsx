@@ -47,7 +47,9 @@ const EditProduct = () => {
 
   useEffect(() => {
     const fetchProduct = async () => {
-      const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/products/${id}`);
+      const res = await fetch(
+        `${import.meta.env.VITE_API_BASE_URL}/api/products/${id}`
+      );
       const data = await res.json();
       setValue("name", data.name);
       setValue("price", data.price);
@@ -57,11 +59,14 @@ const EditProduct = () => {
   }, [id, setValue]);
 
   const onSubmit = async (formData) => {
-    const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/products/${id}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(formData),
-    });
+    const res = await fetch(
+      `${import.meta.env.VITE_API_BASE_URL}/api/products/${id}`,
+      {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      }
+    );
 
     if (res.ok) {
       toast({
@@ -84,34 +89,47 @@ const EditProduct = () => {
   };
 
   return (
-    <Box maxW="md" mx="auto" mt={8} padding={4}>
-      <Button onClick={() => navigate("/")} colorScheme="gray" mb={4}>
-        Back to Products
-      </Button>
-
-      <form onSubmit={handleSubmit(onSubmit)}>
-        <FormControl mb={4} isInvalid={!!errors.name}>
-          <FormLabel>Name</FormLabel>
-          <Input {...register("name")} />
-          <FormErrorMessage>{errors.name?.message}</FormErrorMessage>
-        </FormControl>
-
-        <FormControl mb={4} isInvalid={!!errors.price}>
-          <FormLabel>Price</FormLabel>
-          <Input type="number" {...register("price")} />
-          <FormErrorMessage>{errors.price?.message}</FormErrorMessage>
-        </FormControl>
-
-        <FormControl mb={4} isInvalid={!!errors.image}>
-          <FormLabel>Image URL</FormLabel>
-          <Input {...register("image")} />
-          <FormErrorMessage>{errors.image?.message}</FormErrorMessage>
-        </FormControl>
-
-        <Button type="submit" colorScheme="teal" isLoading={isSubmitting}>
-          Update Product
+    <Box
+      minH="79vh"
+      display="flex"
+      justifyContent="center"
+      alignItems="center"
+      p={4}
+    >
+      <Box maxW="md" width="100%">
+        <Button onClick={() => navigate("/")} colorScheme="gray" mb={4}>
+          Back to Products
         </Button>
-      </form>
+
+        <form onSubmit={handleSubmit(onSubmit)}>
+          <FormControl mb={4} isInvalid={!!errors.name}>
+            <FormLabel>Name</FormLabel>
+            <Input {...register("name")} />
+            <FormErrorMessage>{errors.name?.message}</FormErrorMessage>
+          </FormControl>
+
+          <FormControl mb={4} isInvalid={!!errors.price}>
+            <FormLabel>Price</FormLabel>
+            <Input type="number" {...register("price")} />
+            <FormErrorMessage>{errors.price?.message}</FormErrorMessage>
+          </FormControl>
+
+          <FormControl mb={4} isInvalid={!!errors.image}>
+            <FormLabel>Image URL</FormLabel>
+            <Input {...register("image")} />
+            <FormErrorMessage>{errors.image?.message}</FormErrorMessage>
+          </FormControl>
+
+          <Button
+            type="submit"
+            colorScheme="teal"
+            isLoading={isSubmitting}
+            width="full"
+          >
+            Update Product
+          </Button>
+        </form>
+      </Box>
     </Box>
   );
 };
