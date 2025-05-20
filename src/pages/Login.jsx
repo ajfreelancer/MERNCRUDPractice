@@ -15,16 +15,18 @@ import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import { useNavigate } from "react-router-dom";
-import axios from "axios"; // ✅ Import Axios
+import axios from "axios";
+import { useAuth } from "../context/AuthContext";
 
 const schema = yup.object({
-  email: yup.string().email().required(),
-  password: yup.string().min(6).required(),
+  email: yup.string().email().required("Email is required"),
+  password: yup.string().min(6, "Password must be at least 6 characters").required("Password is required"),
 });
 
 export default function Login() {
-  const toast = useToast(); // ✅ Correct naming convention
+  const toast = useToast();
   const navigate = useNavigate();
+  const { login } = useAuth();
 
   const {
     register,
@@ -40,7 +42,8 @@ export default function Login() {
       );
 
       if (res.data?.token) {
-        localStorage.setItem("token", res.data.token);
+        // ✅ Update context so Navbar re-renders
+        login(res.data.token);
 
         toast({
           title: "Login Successful",
@@ -55,7 +58,6 @@ export default function Login() {
         throw new Error("Invalid response from server");
       }
 
-      navigate("/");
     } catch (err) {
       toast({
         title: "Login Failed",
@@ -75,13 +77,11 @@ export default function Login() {
         p={6}
         m={4}
         boxShadow="md"
-        border={"1px solid #333"}
+        border="1px solid #333"
         borderRadius="md"
       >
         <Center>
-          <Heading mb={6} marginBottom={"4"} width={"fit-content"}>
-            Sign In
-          </Heading>
+          <Heading mb={6}>Sign In</Heading>
         </Center>
         <form onSubmit={handleSubmit(onSubmit)}>
           <VStack spacing={4}>

@@ -5,7 +5,6 @@ import {
   FormLabel,
   Input,
   useToast,
-  Spinner,
   FormErrorMessage,
 } from "@chakra-ui/react";
 import { useParams, useNavigate } from "react-router-dom";
@@ -13,6 +12,7 @@ import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as Yup from "yup";
+import axios from "axios";
 
 // Validation schema
 const schema = Yup.object().shape({
@@ -47,40 +47,52 @@ const EditProduct = () => {
 
   useEffect(() => {
     const fetchProduct = async () => {
-      const res = await fetch(
-        `${import.meta.env.VITE_API_BASE_URL}/api/products/${id}`
-      );
-      const data = await res.json();
-      setValue("name", data.name);
-      setValue("price", data.price);
-      setValue("image", data.image);
+      try {
+        const res = await axios.get(
+          `${import.meta.env.VITE_API_BASE_URL}/api/products/${id}`
+        );
+        const product = res.data;
+        setValue("name", product.name);
+        setValue("price", product.price);
+        setValue("image", product.image);
+      } catch (err) {
+        toast({
+          title: "Error loading product",
+          description: err.response?.data?.message || err.message,
+          status: "error",
+          duration: 3000,
+          isClosable: true,
+        });
+      }
     };
+
     fetchProduct();
-  }, [id, setValue]);
+  }, [id, setValue, toast]);
 
   const onSubmit = async (formData) => {
-    const res = await fetch(
-      `${import.meta.env.VITE_API_BASE_URL}/api/products/${id}`,
-      {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
-      }
-    );
+    try {
+      await axios.put(
+        `${import.meta.env.VITE_API_BASE_URL}/api/products/${id}`,
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
 
-    if (res.ok) {
       toast({
         title: "Product updated!",
         status: "success",
         duration: 2000,
         isClosable: true,
       });
+
       navigate("/");
-    } else {
-      const data = await res.json();
+    } catch (err) {
       toast({
-        title: "Error",
-        description: data.message || "Something went wrong",
+        title: "Error updating product",
+        description: err.response?.data?.message || err.message,
         status: "error",
         duration: 3000,
         isClosable: true,
