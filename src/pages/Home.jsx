@@ -55,21 +55,44 @@ const Home = () => {
 
   const handleDelete = async (id) => {
     try {
+      const token = localStorage.getItem("token");
       const res = await fetch(
         `${import.meta.env.VITE_API_BASE_URL}/api/products/${id}`,
         {
           method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`, // <-- Add this
+          },
         }
       );
 
       const data = await res.json();
       if (res.ok) {
         setProducts((prev) => prev.filter((p) => p._id !== id));
+        toast({
+          title: "Product deleted",
+          status: "success",
+          duration: 3000,
+          isClosable: true,
+        });
       } else {
-        console.error(data.message);
+        toast({
+          title: "Error",
+          description: data.message || "Something went wrong",
+          status: "error",
+          duration: 3000,
+          isClosable: true,
+        });
       }
     } catch (err) {
       console.error("Delete error:", err);
+      toast({
+        title: "Error",
+        description: "Network error or server not responding",
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+      });
     } finally {
       onClose();
     }

@@ -12,6 +12,7 @@ import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as Yup from "yup";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
 // Validation schema
 const schema = Yup.object().shape({
@@ -29,7 +30,7 @@ const CreateProduct = () => {
   const {
     register,
     handleSubmit,
-    formState: { errors },
+    formState: { errors, isSubmitting },
   } = useForm({
     resolver: yupResolver(schema),
   });
@@ -38,29 +39,30 @@ const CreateProduct = () => {
   const navigate = useNavigate();
 
   const onSubmit = async (data) => {
-    const res = await fetch(
-      `${import.meta.env.VITE_API_BASE_URL}/api/products`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
-      }
-    );
+    try {
+      await axios.post(
+        `${import.meta.env.VITE_API_BASE_URL}/api/products`,
+        data,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
 
-    const result = await res.json();
-
-    if (res.ok) {
       toast({
         title: "Product created",
         status: "success",
         duration: 3000,
         isClosable: true,
       });
+
       navigate("/");
-    } else {
+    } catch (err) {
       toast({
         title: "Error",
-        description: result.message || "Something went wrong",
+        description: err.response?.data?.message || err.message,
         status: "error",
         duration: 3000,
         isClosable: true,
@@ -100,7 +102,12 @@ const CreateProduct = () => {
             <FormErrorMessage>{errors.image?.message}</FormErrorMessage>
           </FormControl>
 
-          <Button type="submit" colorScheme="teal" width="full">
+          <Button
+            type="submit"
+            colorScheme="teal"
+            width="full"
+            isLoading={isSubmitting}
+          >
             Create Product
           </Button>
         </form>
