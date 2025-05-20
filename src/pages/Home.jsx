@@ -133,6 +133,7 @@ const Home = () => {
               shadow="md"
             >
               <Image
+                loading="lazy"
                 src={product.image}
                 alt={product.name}
                 height="300px"
@@ -160,7 +161,8 @@ const Home = () => {
                         } else {
                           toast({
                             title: "Unauthorized",
-                            description: "You must be logged in to edit a product.",
+                            description:
+                              "You must be logged in to edit a product.",
                             status: "warning",
                             duration: 3000,
                             isClosable: true,
@@ -179,7 +181,8 @@ const Home = () => {
                         } else {
                           toast({
                             title: "Unauthorized",
-                            description: "You must be logged in to delete a product.",
+                            description:
+                              "You must be logged in to delete a product.",
                             status: "warning",
                             duration: 3000,
                             isClosable: true,
@@ -198,20 +201,29 @@ const Home = () => {
       </Box>
 
       {/* Delete Confirmation Dialog */}
-      <AlertDialog isOpen={isOpen} leastDestructiveRef={cancelRef} onClose={onClose}>
+      <AlertDialog
+        isOpen={isOpen}
+        leastDestructiveRef={cancelRef}
+        onClose={onClose}
+      >
         <AlertDialogOverlay>
           <AlertDialogContent>
             <AlertDialogHeader fontSize="lg" fontWeight="bold">
               Delete Product
             </AlertDialogHeader>
             <AlertDialogBody>
-              Are you sure you want to delete this product? This action cannot be undone.
+              Are you sure you want to delete this product? This action cannot
+              be undone.
             </AlertDialogBody>
             <AlertDialogFooter>
               <Button ref={cancelRef} onClick={onClose}>
                 Cancel
               </Button>
-              <Button colorScheme="red" onClick={() => handleDelete(selectedProductId)} ml={3}>
+              <Button
+                colorScheme="red"
+                onClick={() => handleDelete(selectedProductId)}
+                ml={3}
+              >
                 Delete
               </Button>
             </AlertDialogFooter>
