@@ -32,7 +32,7 @@ const Navbar = () => {
       <Flex align="center">
         <Link to="/">
           <svg
-            width="170"
+            width="130"
             height="42"
             viewBox="0 0 267 42"
             fill="none"
