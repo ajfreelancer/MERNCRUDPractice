@@ -1,4 +1,6 @@
 import { useEffect, useState, useRef } from "react";
+import AOS from "aos";
+import "aos/dist/aos.css";
 
 import {
   Box,
@@ -20,12 +22,13 @@ import {
   AlertDialogFooter,
   useDisclosure,
   useColorModeValue,
+  IconButton,
+  HStack,
+  Button,
 } from "@chakra-ui/react";
-import { Button } from "@chakra-ui/react";
 import { Link, useNavigate } from "react-router-dom";
 import { FiSettings } from "react-icons/fi";
 import { MdDelete } from "react-icons/md";
-import { IconButton, HStack } from "@chakra-ui/react";
 
 const Home = () => {
   const [products, setProducts] = useState([]);
@@ -40,10 +43,14 @@ const Home = () => {
   const toast = useToast();
 
   useEffect(() => {
+    // Initialize AOS animation
+    AOS.init({ duration: 300, once: true, easing: "ease-out" });
+  }, []);
+
+  useEffect(() => {
     fetch(`${import.meta.env.VITE_API_BASE_URL}/api/products`)
       .then((res) => res.json())
       .then((data) => {
-        console.log("Fetched products:", data); // <-- Add this
         setProducts(data);
         setLoading(false);
       })
@@ -61,7 +68,7 @@ const Home = () => {
         {
           method: "DELETE",
           headers: {
-            Authorization: `Bearer ${token}`, // <-- Add this
+            Authorization: `Bearer ${token}`,
           },
         }
       );
@@ -110,19 +117,16 @@ const Home = () => {
     <Center>
       <Box p={4} maxWidth={"1300px"} minH={"100vh"}>
         <Center>
-          <Heading
-            mb={6}
-            marginTop={"8"}
-            marginBottom={"12"}
-            width={"fit-content"}
-          >
+          <Heading mb={6} mt={8} width={"fit-content"}>
             All Products
           </Heading>
         </Center>
         <SimpleGrid columns={{ base: 1, sm: 2, md: 3, lg: 4 }} spacing={6}>
           {products.map((product, index) => (
             <Card
-              key={index}
+              key={product._id}
+              data-aos="fade-up"
+              data-aos-delay={index * 100}
               borderWidth="1px"
               borderRadius="lg"
               overflow="hidden"
@@ -156,8 +160,7 @@ const Home = () => {
                         } else {
                           toast({
                             title: "Unauthorized",
-                            description:
-                              "You must be logged in to edit a product.",
+                            description: "You must be logged in to edit a product.",
                             status: "warning",
                             duration: 3000,
                             isClosable: true,
@@ -165,7 +168,6 @@ const Home = () => {
                         }
                       }}
                     />
-
                     <Button
                       size="sm"
                       colorScheme="red"
@@ -177,8 +179,7 @@ const Home = () => {
                         } else {
                           toast({
                             title: "Unauthorized",
-                            description:
-                              "You must be logged in to delete a product.",
+                            description: "You must be logged in to delete a product.",
                             status: "warning",
                             duration: 3000,
                             isClosable: true,
@@ -195,31 +196,22 @@ const Home = () => {
           ))}
         </SimpleGrid>
       </Box>
-      <AlertDialog
-        isOpen={isOpen}
-        leastDestructiveRef={cancelRef}
-        onClose={onClose}
-      >
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog isOpen={isOpen} leastDestructiveRef={cancelRef} onClose={onClose}>
         <AlertDialogOverlay>
           <AlertDialogContent>
             <AlertDialogHeader fontSize="lg" fontWeight="bold">
               Delete Product
             </AlertDialogHeader>
-
             <AlertDialogBody>
-              Are you sure you want to delete this product? This action cannot
-              be undone.
+              Are you sure you want to delete this product? This action cannot be undone.
             </AlertDialogBody>
-
             <AlertDialogFooter>
               <Button ref={cancelRef} onClick={onClose}>
                 Cancel
               </Button>
-              <Button
-                colorScheme="red"
-                onClick={() => handleDelete(selectedProductId)}
-                ml={3}
-              >
+              <Button colorScheme="red" onClick={() => handleDelete(selectedProductId)} ml={3}>
                 Delete
               </Button>
             </AlertDialogFooter>
