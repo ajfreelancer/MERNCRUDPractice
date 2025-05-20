@@ -9,7 +9,7 @@ import {
   Flex,
   useToast,
   Heading,
-  Center
+  Center,
 } from "@chakra-ui/react";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -39,15 +39,21 @@ export default function Login() {
         data
       );
 
-      localStorage.setItem("token", res.data.token);
+      if (res.data?.token) {
+        localStorage.setItem("token", res.data.token);
 
-      toast({
-        title: "Login Successful",
-        description: "You have successfully logged in.",
-        status: "success",
-        duration: 5000,
-        isClosable: true,
-      });
+        toast({
+          title: "Login Successful",
+          description: "You have successfully logged in.",
+          status: "success",
+          duration: 5000,
+          isClosable: true,
+        });
+
+        navigate("/");
+      } else {
+        throw new Error("Invalid response from server");
+      }
 
       navigate("/");
     } catch (err) {
@@ -73,11 +79,7 @@ export default function Login() {
         borderRadius="md"
       >
         <Center>
-          <Heading
-            mb={6}
-            marginBottom={"4"}
-            width={"fit-content"}
-          >
+          <Heading mb={6} marginBottom={"4"} width={"fit-content"}>
             Sign In
           </Heading>
         </Center>
