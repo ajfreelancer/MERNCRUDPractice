@@ -13,6 +13,7 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import * as Yup from "yup";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import { useState } from "react";
 
 // Validation schema
 const schema = Yup.object().shape({
@@ -21,9 +22,7 @@ const schema = Yup.object().shape({
     .typeError("Price must be a number")
     .positive("Price must be greater than 0")
     .required("Price is required"),
-  image: Yup.string()
-    .url("Image must be a valid URL")
-    .required("Image URL is required"),
+  imageUrl: Yup.string().url("Must be a valid URL").notRequired(),
 });
 
 const CreateProduct = () => {
@@ -35,21 +34,36 @@ const CreateProduct = () => {
     resolver: yupResolver(schema),
   });
 
+  const [imageFile, setImageFile] = useState(null);
   const toast = useToast();
   const navigate = useNavigate();
 
   const onSubmit = async (data) => {
     try {
-      await axios.post(
-        `${import.meta.env.VITE_API_BASE_URL}/api/products`,
-        data,
-        {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        }
-      );
+      const formData = new FormData();
+      formData.append("name", data.name);
+      formData.append("price", data.price);
+
+      if (imageFile) {
+        formData.append("imageFile", imageFile);
+      } else if (data.imageUrl) {
+        formData.append("imageUrl", data.imageUrl);
+      } else {
+        toast({
+          title: "Error",
+          description: "Please provide an image file or image URL",
+          status: "error",
+          duration: 3000,
+          isClosable: true,
+        });
+        return;
+      } 
+      await axios.post(`${import.meta.env.VITE_API_BASE_URL}/api/products`, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
 
       toast({
         title: "Product created",
@@ -71,13 +85,7 @@ const CreateProduct = () => {
   };
 
   return (
-    <Box
-      minH="79vh"
-      display="flex"
-      justifyContent="center"
-      alignItems="center"
-      p={4}
-    >
+    <Box minH="79vh" display="flex" justifyContent="center" alignItems="center" p={4}>
       <Box maxW="md" width="100%">
         <Button onClick={() => navigate("/")} colorScheme="gray" mb={4}>
           Back to Products
@@ -96,18 +104,22 @@ const CreateProduct = () => {
             <FormErrorMessage>{errors.price?.message}</FormErrorMessage>
           </FormControl>
 
-          <FormControl mb={4} isInvalid={!!errors.image}>
+          <FormControl mb={4}>
             <FormLabel>Image URL</FormLabel>
-            <Input {...register("image")} />
-            <FormErrorMessage>{errors.image?.message}</FormErrorMessage>
+            <Input {...register("imageUrl")} />
+            <FormErrorMessage>{errors.imageUrl?.message}</FormErrorMessage>
           </FormControl>
 
-          <Button
-            type="submit"
-            colorScheme="teal"
-            width="full"
-            isLoading={isSubmitting}
-          >
+          <FormControl mb={6}>
+            <FormLabel>Or Upload Image File</FormLabel>
+            <Input
+              type="file"
+              accept="image/*"
+              onChange={(e) => setImageFile(e.target.files[0])}
+            />
+          </FormControl>
+
+          <Button type="submit" colorScheme="teal" width="full" isLoading={isSubmitting}>
             Create Product
           </Button>
         </form>
