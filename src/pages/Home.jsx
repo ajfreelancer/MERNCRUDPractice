@@ -73,7 +73,14 @@ const Home = () => {
         }
       );
 
-      const data = await res.json();
+      let message;
+      try {
+        const data = await res.json();
+        message = data.message;
+      } catch {
+        message = await res.text();
+      }
+
       if (res.ok) {
         setProducts((prev) => prev.filter((p) => p._id !== id));
         toast({
@@ -85,7 +92,7 @@ const Home = () => {
       } else {
         toast({
           title: "Error",
-          description: data.message || "Something went wrong",
+          description: message || "Something went wrong",
           status: "error",
           duration: 3000,
           isClosable: true,
@@ -101,7 +108,8 @@ const Home = () => {
         isClosable: true,
       });
     } finally {
-      onClose();
+      // Optional: close modal or cleanup UI
+      onClose?.(); // Only call if it exists
     }
   };
 
